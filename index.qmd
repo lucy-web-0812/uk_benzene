@@ -635,12 +635,11 @@ p_sites_year <- sites_per_year |>
                            "Sites: ", n_sites))) +
   geom_col(width = 0.85, colour = "white", linewidth = 0.2) +
   scale_fill_manual(values = category_colours, name = NULL) +
-  scale_y_continuous(name = "Number of sites", expand = expansion(mult = c(0, 0.05)), limits = c(0,50)) +
+  scale_y_continuous(name = "Number of sites", expand = expansion(mult = c(0, 0.05)), limits = c(0,50), breaks = seq(0,50,5)) +
   scale_x_continuous(name = NULL,
                      breaks = seq(1995, 2025, 5),
                      labels = \(x) ifelse(x %% 10 == 0, x, "")) +
   guides(fill = guide_legend(nrow = 2)) +
-  labs(caption = "One site classified as \"Unknown Industrial\" (2008–2010) is shown as Urban Industrial.") +
   theme_minimal(base_size) +
   theme(
     legend.position = "top",
@@ -654,6 +653,8 @@ show_plot(p_sites_year)
 ```
 
 ## Active and closed sites
+
+All 34 active non-automatic sites are in urban areas (@fig-site-status). This reflects the networks' original focus on traffic pollution, but it means that suburban and rural communites are largely unmonitored.
 
 ```{r site-status}
 #| label: fig-site-status
@@ -670,19 +671,19 @@ p_status <- monitoring_sites |>
              text = paste0("<b>", `Environment Type`, "</b><br>",
                            network_label, ", ", status, ": ", count, " sites"))) +
   geom_col(width = 0.7, colour = "white", linewidth = 0.2) +
-  facet_wrap(~ network_label, ncol = 1, scales = "free_y") +
+facet_wrap(~ network_label, ncol = 1, scales = "fixed") +
   scale_fill_manual(values = status_colours, name = NULL,
                     breaks = c("active", "closed"),
                     labels = c("Active", "Closed")) +
   scale_x_continuous(name = "Number of monitoring sites",
-                     expand = expansion(mult = c(0, 0.05))) +
+                     expand = expansion(mult = c(0, 0.05)), breaks = seq(0,40,5)) +
   labs(y = NULL) +
   theme_minimal(base_size) +
   theme(
     legend.position = "top",
     panel.grid.major.y = element_blank(),
     panel.grid.minor = element_blank(),
-    strip.text = element_text(face = "bold", hjust = 0)
+      strip.text = element_text(face = "bold", hjust = 0)
   )
 
 show_plot(p_status)
@@ -779,7 +780,6 @@ if (knitr::is_html_output()) {
             colour = status_colours[["active"]], size = 2) +
     geom_sf(data = top_sites, colour = source_marker, shape = 4, size = 3, stroke = 1.2) +
     scale_shape_manual(values = c(Automatic = 17, `Non-automatic` = 16), name = "Active monitor") +
-    labs(caption = "Red crosses: largest point sources, with 10 km radius.") +
     theme_void(12) +
     theme(legend.position = "top")
 }
@@ -789,7 +789,7 @@ if (knitr::is_html_output()) {
 
 ```{r nearest-table}
 #| label: tbl-nearest-monitor
-#| tbl-cap: "Nearest active benzene monitor to each of the ten largest point sources in 2023, and the number of active monitors within 10 km."
+#| tbl-cap: "Nearest active benzene monitor to each of the ten largest point sources in 2023."
 #| echo: false
 
 nearest_monitor_current |>
@@ -798,15 +798,14 @@ nearest_monitor_current |>
     `Emission (t)`       = round(Emission, 1),
     `Nearest monitor`    = paste0(nearest_site, " (", nearest_network, ")"),
     `Monitor type`       = nearest_type,
-    `Distance (km)`      = round(distance_km, 1),
-    `Monitors within 10 km` = monitors_within_10km
+    `Distance (km)`      = round(distance_km, 1)
   ) |>
   knitr::kable(align = "lrllrr")
 ```
 
 #### Has monitoring kept up with the sources?
 
-Figure @fig-distance-trend compares each year's 100 largest point sources with the monitors operational in that year. It shows the median distance to the nearest monitor, and the mean weighted by emissions. This metric gives greater influence to the largest sources.
+@fig-distance-trend compares each year's 100 largest point sources with the monitors operational in that year. It shows the median distance to the nearest monitor, and the mean weighted by emissions. This metric gives greater influence to the largest sources.
 
 While the median distance has stayed roughly constant at 17–19 km, the emission-weighted mean has increased from around 18 km in 2005 to 28 km in 2023. This means that the largest sources have become less well covered by monitoring over time.
 
@@ -889,7 +888,7 @@ London Marylebone Road (automatic) was compared with two nearby non-automatic si
 
 ```{r comparison-map}
 #| label: fig-comparison-map
-#| fig-cap: "Locations of London Marylebone Road (automatic), Camden Kerbside and London Bloomsbury (non-automatic)."
+#| fig-cap: "Locations of London Marylebone Road (automatic), Camden Kerbside (non-automatic) and London Bloomsbury (non-automatic)."
 #| echo: false
 #| warning: false
  
@@ -943,7 +942,7 @@ The chart below shows fortnightly benzene concentrations at the three sites. The
 
 ```{r comparison-plot}
 #| label: fig-comparison-fortnightly
-#| fig-cap: "Fortnightly benzene concentrations at London Marylebone Road (automatic, hourly data averaged over each sampling period), Camden Kerbside and London Bloomsbury (non-automatic). Gaps of more than one month are left unjoined."
+#| fig-cap: "Fortnightly benzene concentrations at London Marylebone Road (automatic, hourly data averaged over each sampling period), Camden Kerbside (non-automatic) and London Bloomsbury (non-automatic). Gaps of more than one month are left unjoined."
 #| echo: false
 #| warning: false
 #| column: page
